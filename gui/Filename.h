@@ -265,7 +265,8 @@ namespace gui
                 }
                 float sampleRate = std::stof(sampleRateStr) * scale;
                 //check valid number
-                fm.sampleRate = sampleRate;
+                if(sampleRate != 0)
+                    fm.sampleRate = sampleRate;
             }
         }
 
