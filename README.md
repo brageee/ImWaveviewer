@@ -1,5 +1,5 @@
 
-ImWaveviewer is a tool to analyze signals.
+ImWaveviewer is a tool to analyze signals. 
 
 Dependencies:
 -Liquid-dsp 
@@ -17,3 +17,5 @@ cd liquid-dsp
 ./configure
 make
 sudo make install
+
+Clone ImWaveviewer with --recursive-submodules and build with cmake.
