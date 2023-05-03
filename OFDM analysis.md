@@ -18,7 +18,7 @@ What we need to know about a OFDM signal:
 
 ## Analysis steps
 The steps to find key parameters of the OFDM signal is as follows:
-- Perform autocorrelation to find Nu. As we may or may not be at the correct sample rate, the autocorrelation peak will not immediately tell us the FFT size, but it will tell us the carrier spacing -> Sample rate / <autocorrelation peak> = carrier spacing.
+- Perform autocorrelation to find Nu. As we may or may not be at the correct sample rate, the autocorrelation peak will not immediately tell us the FFT size, but it will tell us the carrier spacing -> Sample rate / autocorrelation peak = carrier spacing.
 - Measure bandwidth with simple power spectrum.
 - Estimate number of carriers: BW/carrier spacing.
 - Likely FFT size is the 2^N closest to BW/carrier spacing. E.g. if BW/carrier spacing = 56.4, likely FFT size is 64.
