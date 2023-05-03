@@ -19,43 +19,12 @@ namespace gui
 
         //ImGui::SameLine();
         //ImGui::BeginChild("ChildR", ImVec2(-1, -1));                                  
-        
+        /*
         if(currentSampleIndex+samplesPerRow>numSamples)             
         {
             currentSampleIndex = numSamples-samplesPerRow;                                                            
         }
-
-        //Update plot data
-        if(updatePlots)
-        {
-            if(!src->RealSignal())         
-            {
-                std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(src);
-                UpdateData(concrete, currentSampleIndex);
-                updatePlots = false;
-            } else
-            {
-                std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(src);
-                UpdateData(concrete, currentSampleIndex);
-                updatePlots = false;
-            }
-            if(markers.xPeriodic) updatePeriodicXVals = true;
-        }
-        if(updatePeriodicXVals)
-        {
-            numPeriodicXVals = static_cast<int>((binIndices[binIndices.size()-1]-binIndices[0])/markers.xPeriod)+1;
-            periodicXVals.resize(numPeriodicXVals);
-            double initVal = markers.xPeriodicReference;
-            while(initVal-markers.xPeriod > binIndices[0])
-                initVal -= markers.xPeriod;
-            while(initVal < binIndices[0])
-                initVal += markers.xPeriod;
-            for (size_t i = 0; i < numPeriodicXVals; i++)
-            {
-                periodicXVals[i] = initVal+i*markers.xPeriod;
-            }
-            updatePeriodicXVals = false;
-        }
+        */        
         static ImGuiTableFlags flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable;// | ImGuiTableFlags_RowBg;// | ImGuiTableFlags_NoBordersInBody;
         if (ImGui::BeginTable("", 2, flags))
         {
@@ -63,7 +32,38 @@ namespace gui
             ImGui::TableSetupColumn("Plot", ImGuiTableColumnFlags_NoHide);
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            ShowControls(currentSampleIndex, markers, updatePlots);                
+            ShowControls(currentSampleIndex, markers, updatePlots);   
+            //Update plot data
+            if(updatePlots)
+            {
+                if(!src->RealSignal())         
+                {
+                    std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(src);
+                    UpdateData(concrete, currentSampleIndex);
+                    updatePlots = false;
+                } else
+                {
+                    std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(src);
+                    UpdateData(concrete, currentSampleIndex);
+                    updatePlots = false;
+                }
+                if(markers.xPeriodic) updatePeriodicXVals = true;
+            }
+            if(updatePeriodicXVals)
+            {
+                numPeriodicXVals = static_cast<int>((binIndices[binIndices.size()-1]-binIndices[0])/markers.xPeriod)+1;
+                periodicXVals.resize(numPeriodicXVals);
+                double initVal = markers.xPeriodicReference;
+                while(initVal-markers.xPeriod > binIndices[0])
+                    initVal -= markers.xPeriod;
+                while(initVal < binIndices[0])
+                    initVal += markers.xPeriod;
+                for (size_t i = 0; i < numPeriodicXVals; i++)
+                {
+                    periodicXVals[i] = initVal+i*markers.xPeriod;
+                }
+                updatePeriodicXVals = false;
+            }             
             ImGui::TableNextColumn();
             PlotData(currentSampleIndex, markers, updatePlots);
             ImGui::EndTable();
@@ -304,13 +304,29 @@ namespace gui
     void PowerSpectrum::ShowControls(int &currentSampleIndex, Markers &markers, bool &updatePlots)
     {
         ImGui::BeginChild("ControlChild");//, ImVec2(ImGui::GetWindowContentRegionWidth() * 0.2f, -1));
-        ImGui::Text("Display parameters");
-        ImGui::Text("Start sample");        
-        if(gui::InputSampleIndex(currentSampleIndex, samplesPerRow, numSamples))
-            updatePlots = true;
-        ImGui::Text("Samples per row");        
-        if(gui::InputSamplesPerRow(currentSampleIndex, samplesPerRow, numSamples))        
-            updatePlots = true;    
+        //ImGui::Text("Display parameters");
+        ImGui::Text("Start sample");   
+        ImGui::SetNextItemWidth(180);                              
+        currentSampleIndexStr = std::to_string(currentSampleIndex);
+        if(gui::InputStrAndEvaluateToInt("##psdsampleIndexStr",currentSampleIndexStr))
+        {         
+            currentSampleIndex = std::stoi(currentSampleIndexStr);
+            //Check if we went out-of-bounds with out expression
+            if(currentSampleIndex < 0)
+                currentSampleIndex = 0;       
+            updatePlots = true;     
+        }
+        ImGui::Text("Samples per row"); 
+        ImGui::SetNextItemWidth(180);                                
+        samplesPerRowStr = std::to_string(samplesPerRow);
+        if(gui::InputStrAndEvaluateToInt("##psdsamplesPerRowStr",samplesPerRowStr))
+        {
+            samplesPerRow = std::stoi(samplesPerRowStr);
+            if(samplesPerRow<1)
+                samplesPerRow = 1; 
+            
+            updatePlots = true;                         
+        }  
         ImGui::Separator();
         ImGui::Text("Spectral parameters");
         ImGui::Text("FFT length");
@@ -390,12 +406,25 @@ namespace gui
             updatePeriodicXVals = true;
         if(!markers.xPeriodic)
             ImGui::BeginDisabled();
-        ImGui::Text("Period"); ImGui::SameLine();
-        if(ImGui::InputFloat("##xperiod", &markers.xPeriod))
+        ImGui::Text("Period       "); ImGui::SameLine();        
+        xPeriodStr = std::to_string(markers.xPeriod);
+        if(gui::InputStrAndEvaluateToDouble("##xperiod", xPeriodStr))
+        {
+            markers.xPeriod = std::stof(xPeriodStr);
+            if(markers.xPeriod <= 0)
+                markers.xPeriod = 1;
             updatePeriodicXVals = true;
-        ImGui::Text("Reference"); ImGui::SameLine();
-        if(ImGui::InputDouble("##xreference", &markers.xPeriodicReference))
+        }
+            
+        ImGui::Text("Reference"); ImGui::SameLine();        
+        xReferenceStr = std::to_string(markers.xPeriodicReference);
+        if(gui::InputStrAndEvaluateToDouble("##xPeriodRef", xReferenceStr))
+        {
+            markers.xPeriodicReference = std::stod(xReferenceStr);
+            if(markers.xPeriodicReference < 0)
+                markers.xPeriodicReference = 0;
             updatePeriodicXVals = true;
+        }
         if(!markers.xPeriodic)
             ImGui::EndDisabled();  
         if(ImGui::Button("Reset x markers"))

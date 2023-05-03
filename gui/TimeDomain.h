@@ -40,6 +40,10 @@ namespace gui
             virtual void UpdateData(std::shared_ptr<SampleSource<float>> src, int &currentSampleIndex);
 
             //Time Domain variables and parameters
+            std::string currentSampleIndexStr = ""; // to facility math expressions
+            std::string samplesPerRowStr = ""; // to facility math expressions
+            std::string xPeriodStr = ""; // to facility math expressions
+            std::string xReferenceStr = ""; // to facility math expressions
             vf signalReal;
             vf signalImag;
             bool displayReal = true;
@@ -51,7 +55,7 @@ namespace gui
             int numSamples;
             bool isReal;
             ImPlotRect axis;
-            vector<bool> setAxisFit {false, false, false, false, false};
+            vector<bool> updateXAxis {false, false, false, false, false};
             vector<bool> resizeY {true, true, true, true, true};            
 
             int traceController = 0; //0 real, 1 imag, 2 am, 3 fm, 4 phase

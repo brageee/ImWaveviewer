@@ -40,6 +40,10 @@ namespace gui
             virtual void UpdateData(std::shared_ptr<SampleSource<std::complex<float>>> src, int &currentSampleIndex) ;
             virtual void UpdateData(std::shared_ptr<SampleSource<float>> src, int &currentSampleIndex);
 
+            std::string currentSampleIndexStr = ""; // to facility math expressions
+            std::string samplesPerRowStr = ""; // to facility math expressions
+            std::string xPeriodStr = ""; // to facility math expressions
+            std::string xReferenceStr = ""; // to facility math expressions
             vf spectrogram;
             std::vector<processing::utils::ExamplePoint> spectrogram2D;
             vf miniPowerWindow; 

@@ -35,58 +35,7 @@ namespace gui
 
     void Spectrogram::Update(std::shared_ptr<AbstractSampleSource> src, int &currentSampleIndex, Markers &markers, bool &updatePlots)
     {
-        numSamples = static_cast<int>(src->Count());        
-
-        //Update plot data
-        if(updatePlots)
-        {
-            if(!src->RealSignal())         
-            {
-                realFactor = 1;
-                std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(src);
-                UpdateData(concrete, currentSampleIndex);
-                updatePlots = false;
-            } else
-            {
-                realFactor = 0.5;
-                std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(src);
-                UpdateData(concrete, currentSampleIndex);
-                updatePlots = false;
-            }
-            if(markers.xPeriodic) updatePeriodicXVals = true;
-        }
-        if(updateDownsampling)
-        {
-            samplesPerRowPlot = samplesPerRowPlotMax;
-            float samplesPerBin = (samplesPerRow)/samplesPerRowPlot;
-            std::vector<processing::utils::ExamplePoint> spectrogramDownsampled;
-            processing::utils::PointLttb::Downsample(spectrogram2D.begin(), spectrogram2D.size(), std::back_insert_iterator<std::vector<processing::utils::ExamplePoint>>(spectrogramDownsampled), fftSize*samplesPerRowPlot*realFactor);
-            spectrogram.resize(fftSize*samplesPerRowPlot*realFactor);
-            for (size_t i = 0; i < fftSize*samplesPerRowPlot*realFactor; i++)
-            {
-                float y = spectrogramDownsampled[i].y;
-                spectrogram[i] = spectrogramDownsampled[i].y;
-            }
-           
-            updateDownsampling = false;
-        }
-        if(updatePeriodicXVals)
-        {
-            numPeriodicXVals = static_cast<int>(samplesPerRow/markers.xPeriod)+1;
-            periodicXVals.resize(numPeriodicXVals);
-            int numPeriodDiff = static_cast<int>((markers.xPeriodicReference-currentSampleIndex)/markers.xPeriod);
-            double initVal = markers.xPeriodicReference-numPeriodDiff*markers.xPeriod;
-            while(initVal<0)
-                initVal +=markers.xPeriod;
-            for (size_t i = 0; i < numPeriodicXVals; i++)
-            {
-                periodicXVals[i] = initVal+i*markers.xPeriod;
-            }
-            updatePeriodicXVals = false;
-        }
-
-        xAxisMin = currentSampleIndex;
-        xAxisMax = currentSampleIndex+samplesPerRow; 
+        numSamples = static_cast<int>(src->Count());                
 
         static ImGuiTableFlags flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable;// | ImGuiTableFlags_RowBg;// | ImGuiTableFlags_NoBordersInBody;
         if (ImGui::BeginTable("", 2, flags))
@@ -95,7 +44,57 @@ namespace gui
             ImGui::TableSetupColumn("Plot", ImGuiTableColumnFlags_NoHide);
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            ShowControls(currentSampleIndex, markers, updatePlots);                
+            ShowControls(currentSampleIndex, markers, updatePlots); 
+            //Update plot data
+            if(updatePlots)
+            {
+                if(!src->RealSignal())         
+                {
+                    realFactor = 1;
+                    std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(src);
+                    UpdateData(concrete, currentSampleIndex);
+                    updatePlots = false;
+                } else
+                {
+                    realFactor = 0.5;
+                    std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(src);
+                    UpdateData(concrete, currentSampleIndex);
+                    updatePlots = false;
+                }
+                if(markers.xPeriodic) updatePeriodicXVals = true;
+            }
+            if(updateDownsampling)
+            {
+                samplesPerRowPlot = samplesPerRowPlotMax;
+                float samplesPerBin = (samplesPerRow)/samplesPerRowPlot;
+                std::vector<processing::utils::ExamplePoint> spectrogramDownsampled;
+                processing::utils::PointLttb::Downsample(spectrogram2D.begin(), spectrogram2D.size(), std::back_insert_iterator<std::vector<processing::utils::ExamplePoint>>(spectrogramDownsampled), fftSize*samplesPerRowPlot*realFactor);
+                spectrogram.resize(fftSize*samplesPerRowPlot*realFactor);
+                for (size_t i = 0; i < fftSize*samplesPerRowPlot*realFactor; i++)
+                {
+                    float y = spectrogramDownsampled[i].y;
+                    spectrogram[i] = spectrogramDownsampled[i].y;
+                }
+            
+                updateDownsampling = false;
+            }
+            if(updatePeriodicXVals)
+            {
+                numPeriodicXVals = static_cast<int>(samplesPerRow/markers.xPeriod)+1;
+                periodicXVals.resize(numPeriodicXVals);
+                int numPeriodDiff = static_cast<int>((markers.xPeriodicReference-currentSampleIndex)/markers.xPeriod);
+                double initVal = markers.xPeriodicReference-numPeriodDiff*markers.xPeriod;
+                while(initVal<0)
+                    initVal +=markers.xPeriod;
+                for (size_t i = 0; i < numPeriodicXVals; i++)
+                {
+                    periodicXVals[i] = initVal+i*markers.xPeriod;
+                }
+                updatePeriodicXVals = false;
+            }
+
+            xAxisMin = currentSampleIndex;
+            xAxisMax = currentSampleIndex+samplesPerRow;                
             ImGui::TableNextColumn();
             PlotData(currentSampleIndex, markers, updatePlots);
             ImGui::EndTable();
@@ -324,25 +323,33 @@ namespace gui
     void Spectrogram::ShowControls(int &currentSampleIndex, Markers &markers, bool &updatePlots)
     {        
         ImGui::BeginChild("ControlChild");//, ImVec2(ImGui::GetWindowContentRegionWidth() * 0.2f, -1));
-        ImGui::Text("Display parameters");
+        //ImGui::Text("Display parameters");
         ImGui::Text("Start sample");        
-        if(ImGui::InputInt("##currentsampleindex", &currentSampleIndex))
+        ImGui::SetNextItemWidth(180);                 
+        //if(ImGui::InputInt("##currentsampleindex", &currentSampleIndex))
+        currentSampleIndexStr = std::to_string(currentSampleIndex);
+        if(gui::InputStrAndEvaluateToInt("##spsampleIndexStr",currentSampleIndexStr))
         {         
-           if(currentSampleIndex < 0)
-                currentSampleIndex = 0;
-           if(currentSampleIndex+samplesPerRow+windowLength >= numSamples)
-                samplesPerRow = numSamples-currentSampleIndex-windowLength; 
+            currentSampleIndex = std::stoi(currentSampleIndexStr);
+            //Check if we went out-of-bounds with out expression
+            if(currentSampleIndex < 0)
+                    currentSampleIndex = 0;            
             axis.X.Min = currentSampleIndex;
             axis.X.Max = axis.X.Min+samplesPerRow;   
             updatePlots = true;        
             setXAxis = true;
         }            
-        ImGui::Text("Samples per row");        
-        if(ImGui::InputInt("##numsamplesperrow", &samplesPerRow))
+        ImGui::Text("Samples per row");   
+        ImGui::SetNextItemWidth(180);                      
+        //if(ImGui::InputInt("##numsamplesperrow", &samplesPerRow))
+        samplesPerRowStr = std::to_string(samplesPerRow);
+        if(gui::InputStrAndEvaluateToInt("##spsamplesPerRowStr",samplesPerRowStr))
         {
-            updatePlots = true;            
+            samplesPerRow = std::stoi(samplesPerRowStr);
             if(samplesPerRow<1)
-                samplesPerRow = 1;  
+                samplesPerRow = 1; 
+            
+            updatePlots = true;                         
             axis.X.Max = axis.X.Min+samplesPerRow;
             setXAxis = true;
             //windowShift = samplesPerRow/(2*fftSize*10);                           
@@ -358,6 +365,7 @@ namespace gui
         } 
         axis.X.Min = currentSampleIndex;
         axis.X.Max = axis.X.Min+samplesPerRow;   
+        ImGui::Separator();
         ImGui::Text("Samples after downsampling");  
         if(ImGui::InputInt("##numsamplesafterdown", &samplesPerRowPlotMax))
         {
@@ -406,12 +414,25 @@ namespace gui
             updatePeriodicXVals = true;
         if(!markers.xPeriodic)
             ImGui::BeginDisabled();
-        ImGui::Text("Period"); ImGui::SameLine();
-        if(ImGui::InputFloat("##xperiod", &markers.xPeriod))
+        ImGui::Text("Period       "); ImGui::SameLine();        
+        xPeriodStr = std::to_string(markers.xPeriod);
+        if(gui::InputStrAndEvaluateToDouble("##xperiod", xPeriodStr))
+        {
+            markers.xPeriod = std::stof(xPeriodStr);
+            if(markers.xPeriod <= 0)
+                markers.xPeriod = 1;
             updatePeriodicXVals = true;
-        ImGui::Text("Reference"); ImGui::SameLine();
-        if(ImGui::InputDouble("##xreference", &markers.xPeriodicReference))
+        }
+            
+        ImGui::Text("Reference"); ImGui::SameLine();        
+        xReferenceStr = std::to_string(markers.xPeriodicReference);
+        if(gui::InputStrAndEvaluateToDouble("##xPeriodRef", xReferenceStr))
+        {
+            markers.xPeriodicReference = std::stod(xReferenceStr);
+            if(markers.xPeriodicReference < 0)
+                markers.xPeriodicReference = 0;
             updatePeriodicXVals = true;
+        }
         if(!markers.xPeriodic)
             ImGui::EndDisabled();  
         if(ImGui::Button("Reset x markers"))

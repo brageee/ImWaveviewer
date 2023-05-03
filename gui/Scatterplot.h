@@ -36,6 +36,8 @@ namespace gui
             void UpdateDecimationReal();
 
             //Scatterplot variables and parameters
+            std::string currentSampleIndexStr = ""; // to facility math expressions
+            std::string samplesPerRowStr = ""; // to facility math expressions
             size_t numSamples;
             int numRows = 1;
             int numCols = 1;
