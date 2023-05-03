@@ -20,30 +20,7 @@ namespace gui
         /*ShowControls(currentSampleIndex, markers, updatePlots);
         ImGui::SameLine();
         ImGui::BeginChild("ChildR", ImVec2(-1, -1));                                  
-        */        
-        
-        //Update plot data
-        if(updatePlots)
-        {
-            if(!isReal)         
-            {
-                std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(src);
-                UpdateData(concrete, currentSampleIndex);
-                updatePlots = false;
-            } else
-            {
-                std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(src);
-                UpdateData(concrete, currentSampleIndex);
-                updatePlots = false;
-            }
-            updateDecimation = true;
-        }
-        if(updateDecimation)
-        {
-            if(!isReal) UpdateDecimationComplex();
-            else UpdateDecimationReal();
-            updateDecimation = false;
-        }
+        */                        
 
         static ImGuiTableFlags flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable;// | ImGuiTableFlags_RowBg;// | ImGuiTableFlags_NoBordersInBody;
         if (ImGui::BeginTable("", 2, flags))
@@ -52,7 +29,29 @@ namespace gui
             ImGui::TableSetupColumn("Plot", ImGuiTableColumnFlags_NoHide);
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            ShowControls(currentSampleIndex, markers, updatePlots);                
+            ShowControls(currentSampleIndex, markers, updatePlots);  
+            //Update plot data
+            if(updatePlots)
+            {
+                if(!isReal)         
+                {
+                    std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(src);
+                    UpdateData(concrete, currentSampleIndex);
+                    updatePlots = false;
+                } else
+                {
+                    std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(src);
+                    UpdateData(concrete, currentSampleIndex);
+                    updatePlots = false;
+                }
+                updateDecimation = true;
+            }
+            if(updateDecimation)
+            {
+                if(!isReal) UpdateDecimationComplex();
+                else UpdateDecimationReal();
+                updateDecimation = false;
+            }              
             ImGui::TableNextColumn();
             PlotData(currentSampleIndex, markers, updatePlots);
             ImGui::EndTable();
@@ -180,13 +179,29 @@ namespace gui
     void Scatterplot::ShowControls(int &currentSampleIndex, Markers &markers, bool &updatePlots)
     {
         ImGui::BeginChild("ControlChild");//, ImVec2(ImGui::GetWindowContentRegionWidth() * 0.2f, -1));
-        ImGui::Text("Display parameters");
-        ImGui::Text("Start sample");                
-        if(gui::InputSampleIndex(currentSampleIndex, samplesPerRow, numSamples))
-            updatePlots = true;
-        ImGui::Text("Samples per row");        
-        if(gui::InputSamplesPerRow(currentSampleIndex, samplesPerRow, numSamples))        
-            updatePlots = true;                             
+        //ImGui::Text("Display parameters");
+        ImGui::Text("Start sample");      
+        ImGui::SetNextItemWidth(180);                           
+        currentSampleIndexStr = std::to_string(currentSampleIndex);
+        if(gui::InputStrAndEvaluateToInt("##scsampleIndexStr",currentSampleIndexStr))
+        {         
+            currentSampleIndex = std::stoi(currentSampleIndexStr);
+            //Check if we went out-of-bounds with out expression
+            if(currentSampleIndex < 0)
+                currentSampleIndex = 0;       
+            updatePlots = true;     
+        }
+        ImGui::Text("Samples per row");     
+        ImGui::SetNextItemWidth(180);                    
+        samplesPerRowStr = std::to_string(samplesPerRow);
+        if(gui::InputStrAndEvaluateToInt("##scsamplesPerRowStr",samplesPerRowStr))
+        {
+            samplesPerRow = std::stoi(samplesPerRowStr);
+            if(samplesPerRow<1)
+                samplesPerRow = 1; 
+            
+            updatePlots = true;                         
+        }                           
         ImGui::Separator();
         ImGui::Text("Scatter view");
         ImGui::Text("Decimation");

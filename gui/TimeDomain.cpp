@@ -1,4 +1,5 @@
 #include "TimeDomain.h"
+#include "Helpers.h"
 
 namespace gui
 {
@@ -19,6 +20,7 @@ namespace gui
         /*
         if(updatePeriodicYVals)
         {
+            //### Some work to be done for this to work ###
             numPeriodicXVals = static_cast<int>(samplesPerRow/markers.xPeriod)+1;
             periodicXVals.resize(numPeriodicXVals);
             double initVal = currentSampleIndex;
@@ -50,7 +52,7 @@ namespace gui
                     UpdateData(concrete, currentSampleIndex);
                 }
                 updatePlots = false;
-                setAxisFit.assign(5,true);
+                updateXAxis.assign(5,true);
                 if(markers.xPeriodic) updatePeriodicXVals = true;      
                 if(markers.yPeriodic) updatePeriodicYVals = true;      
             }
@@ -94,7 +96,7 @@ namespace gui
                 if(ImPlot::BeginPlot("##tdreal", ImVec2(-1, 0.95f*ImGui::GetWindowHeight()/numWins)))
                 {                                                         
                     ImPlot::SetupAxes("Samples","Real");                                                                                                        
-                    if(setAxisFit[0]){
+                    if(updateXAxis[0]){
                         ImPlot::SetupAxisLimits(ImAxis_X1, axis.X.Min, axis.X.Max, ImPlotCond_Always);//, ImPlotCond_Once);                                
                         //ImPlot::SetupAxisLimits(ImAxis_Y1, yRealMin, yRealMax, ImPlotCond_Always);//, ImPlotCond_Once);                                
                     } 
@@ -142,14 +144,14 @@ namespace gui
                     }
                     ImPlot::EndPlot();
                 }
-                setAxisFit[0] = false;                                                                           
+                updateXAxis[0] = false;                                                                           
             }                          
             if(displayImag && !isReal)
             {                                                                                                    
                 if(ImPlot::BeginPlot("##tdimag",ImVec2(-1, 0.95f*ImGui::GetWindowHeight()/numWins)))
                 {                                            
                     ImPlot::SetupAxes("Samples","Imag"); 
-                    if(setAxisFit[1]){
+                    if(updateXAxis[1]){
                         ImPlot::SetupAxisLimits(ImAxis_X1,axis.X.Min, axis.X.Max, ImPlotCond_Always);//, ImPlotCond_Once);                                                        
                     } 
                     if(resizeY[1])    
@@ -196,14 +198,14 @@ namespace gui
                     }      
                     ImPlot::EndPlot();
                 }
-                setAxisFit[1] = false;                                       
+                updateXAxis[1] = false;                                       
             }                
             if(displayAM)
             {                                                                                           
                 if(ImPlot::BeginPlot("##tdam",ImVec2(-1, 0.95f*ImGui::GetWindowHeight()/numWins)))
                 {                                            
                     ImPlot::SetupAxes("Samples","AM");            
-                    if(setAxisFit[2])
+                    if(updateXAxis[2])
                     {
                         ImPlot::SetupAxisLimits(ImAxis_X1, axis.X.Min, axis.X.Max, ImPlotCond_Always);//, ImPlotCond_Once);                                                            
                     }
@@ -251,14 +253,14 @@ namespace gui
                     }    
                     ImPlot::EndPlot();
                 }
-                setAxisFit[2] = false;                          
+                updateXAxis[2] = false;                          
             }
             if(displayFM)
             {                                                                                              
                 if(ImPlot::BeginPlot("##tdfm",ImVec2(-1, 0.95f*ImGui::GetWindowHeight()/numWins)))
                 {                                            
                     ImPlot::SetupAxes("Samples","FM");  
-                    if(setAxisFit[3])
+                    if(updateXAxis[3])
                     {
                         ImPlot::SetupAxisLimits(ImAxis_X1, axis.X.Min, axis.X.Max, ImPlotCond_Always);//, ImPlotCond_Once);                              
                     } 
@@ -306,14 +308,14 @@ namespace gui
                     }   
                     ImPlot::EndPlot();
                 }
-                setAxisFit[3] = false;             
+                updateXAxis[3] = false;             
             }
             if(displayPhase)
             {                                                                                              
                 if(ImPlot::BeginPlot("##tdphase",ImVec2(-1, 0.95f*ImGui::GetWindowHeight()/numWins)))
                 {                                            
                     ImPlot::SetupAxes("Samples","Phase"); 
-                     if(setAxisFit[4])
+                     if(updateXAxis[4])
                     {
                         ImPlot::SetupAxisLimits(ImAxis_X1, axis.X.Min, axis.X.Max, ImPlotCond_Always);//, ImPlotCond_Once);      
                         ImPlot::SetupAxisLimits(ImAxis_Y1, yPhaseMin, yPhaseMax, ImPlotCond_Always);//, ImPlotCond_Once);                                
@@ -364,15 +366,14 @@ namespace gui
                     }    
                     ImPlot::EndPlot();
                 }
-                setAxisFit[4] = false;                                     
+                updateXAxis[4] = false;                                     
             }
             
             if(numWins>0)
             {
                 ImGui::SetNextItemWidth(-1);                    
                 if(ImGui::SliderInt("##sampleSlider", &currentSampleIndex, 0, numSamples-samplesPerRow))
-                {
-                    //setAxisFit.assign(5,true);                                                
+                {                                                                  
                     axis.X.Min = currentSampleIndex;
                     axis.X.Max = axis.X.Min+samplesPerRow;     
                     updatePlots = true;                              
@@ -385,6 +386,8 @@ namespace gui
 
     void TimeDomain::UpdateData(std::shared_ptr<SampleSource<float>> src, int &currentSampleIndex)
     {     
+        //Do out-of-bounds check in case we came from another domain
+        //with currentSampleIndex that would lead to out-of-bounds here
         if(currentSampleIndex+samplesPerRow >= numSamples)
             currentSampleIndex = numSamples-samplesPerRow;
         if(currentSampleIndex < 0)
@@ -473,6 +476,8 @@ namespace gui
 
     void TimeDomain::UpdateData(std::shared_ptr<SampleSource<std::complex<float>>> src, int &currentSampleIndex)
     {  
+        //Do out-of-bounds check in case we came from another domain
+        //with currentSampleIndex that would lead to out-of-bounds here
         if(currentSampleIndex+samplesPerRow >= numSamples)
             currentSampleIndex = numSamples-samplesPerRow;
         if(currentSampleIndex < 0)
@@ -574,34 +579,46 @@ namespace gui
         //Setup controls
         ImGui::BeginChild("ConotrolChild");//, ImVec2(ImGui::GetWindowContentRegionWidth() * 0.2f, -1));        
         ImGui::Text("Start sample");      
-        ImGui::SetNextItemWidth(200);                 
-        if(ImGui::InputInt("##startsample", &currentSampleIndex))
-        {
-            setAxisFit.assign(5,true);                                                   
+        ImGui::SetNextItemWidth(180);                 
+        //if(ImGui::InputInt("##startsample", &currentSampleIndex))
+        currentSampleIndexStr = std::to_string(currentSampleIndex);
+        if(gui::InputStrAndEvaluateToInt("##tdsampleIndexStr",currentSampleIndexStr))
+        {                
+            currentSampleIndex = std::stoi(currentSampleIndexStr);
+            //Check if we went out-of-bounds with out expression
             if(currentSampleIndex < 0)
                 currentSampleIndex = 0;
             if(currentSampleIndex+samplesPerRow >= numSamples)
                 samplesPerRow = numSamples-currentSampleIndex;
+                
+            //Update axis
             axis.X.Min = currentSampleIndex;
             axis.X.Max = axis.X.Min+samplesPerRow;
-            updatePlots = true;                        
+            updatePlots = true;                    
+            updateXAxis.assign(5,true);     
         }                
         ImGui::Text("Samples/row");
-        ImGui::SetNextItemWidth(200);    
-        if(ImGui::InputInt("##samplesperrowtd", &samplesPerRow))
-        {
-            setAxisFit.assign(5,true);  
+        ImGui::SetNextItemWidth(180);                    
+        //if(ImGui::InputInt("##samplesperrowtd", &samplesPerRow))
+        samplesPerRowStr = std::to_string(samplesPerRow);
+        if(gui::InputStrAndEvaluateToInt("##tdsamplesPerRowStr",samplesPerRowStr))
+        {    
+            samplesPerRow = std::stoi(samplesPerRowStr);
+            //Check if we went out of bounds with out expression
+            if(samplesPerRow<1)
+                samplesPerRow = 1;        
             if(currentSampleIndex+samplesPerRow >= numSamples)
                 currentSampleIndex = numSamples-samplesPerRow;
             if(currentSampleIndex < 0)
             {
                 currentSampleIndex = 0;
                 samplesPerRow = numSamples;
-            }
-            if(samplesPerRow<1)
-                samplesPerRow = 1;
+            }          
+
+            //Update axis  
             axis.X.Max = axis.X.Min+samplesPerRow;
             updatePlots = true;
+            updateXAxis.assign(5,true);  
         }
         ImGui::Separator();
         ImGui::Text("Plots to display");
@@ -690,12 +707,25 @@ namespace gui
             updatePeriodicXVals = true;
         if(!markers.xPeriodic)
             ImGui::BeginDisabled();
-        ImGui::Text("Period"); ImGui::SameLine();
-        if(ImGui::InputFloat("##xperiod", &markers.xPeriod))
+        ImGui::Text("Period       "); ImGui::SameLine();        
+        xPeriodStr = std::to_string(markers.xPeriod);
+        if(gui::InputStrAndEvaluateToDouble("##xperiod", xPeriodStr))
+        {
+            markers.xPeriod = std::stof(xPeriodStr);
+            if(markers.xPeriod <= 0)
+                markers.xPeriod = 1;
             updatePeriodicXVals = true;
-        ImGui::Text("Reference"); ImGui::SameLine();
-        if(ImGui::InputDouble("##xreference", &markers.xPeriodicReference))
+        }
+            
+        ImGui::Text("Reference"); ImGui::SameLine();        
+        xReferenceStr = std::to_string(markers.xPeriodicReference);
+        if(gui::InputStrAndEvaluateToDouble("##xPeriodRef", xReferenceStr))
+        {
+            markers.xPeriodicReference = std::stod(xReferenceStr);
+            if(markers.xPeriodicReference < 0)
+                markers.xPeriodicReference = 0;
             updatePeriodicXVals = true;
+        }            
         if(!markers.xPeriodic)
             ImGui::EndDisabled();  
         if(ImGui::Button("Reset x markers"))

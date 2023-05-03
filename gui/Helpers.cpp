@@ -34,4 +34,66 @@ namespace gui
         }
         return res;
     }
+
+    bool InputStrAndEvaluateToInt(const char *label, std::string &value)
+    {
+        bool res = false;
+        std::string backup = value;        
+        bool evaluate = false;
+        double dresult = 0.0;        
+        if(ImGui::InputText(label, &value))        
+        {
+            evaluate = true;
+            res = true;
+        }
+        if(evaluate)
+        {            
+            expression_t expression;
+            parser_t parser;
+
+            if (parser.compile(value,expression))
+            {
+                dresult= expression.value();
+                //std::cout << "Result was " << dresult << std::endl;
+                int result = static_cast<int>(dresult);
+                value = std::to_string(result);
+                //printf("Result: %19.15 \n",dresult);
+            }
+            else
+            {
+                //printf("Error in expression. \n");
+                value = backup;
+            }                
+        }        
+        return res;
+    }
+
+    bool InputStrAndEvaluateToDouble(const char *label, std::string &value)
+    {
+        bool res = false;
+        std::string backup = value;        
+        bool evaluate = false;
+        double result = 0.0;        
+        if(ImGui::InputText(label, &value))        
+        {
+            evaluate = true;
+            res = true;
+        }
+        if(evaluate)
+        {            
+            expression_t expression;
+            parser_t parser;
+
+            if (parser.compile(value,expression))
+            {
+                result= expression.value();                
+                value = std::to_string(result);             
+            }
+            else
+            {                
+                value = backup;
+            }                
+        }        
+        return res;
+    }
 } // namespace gui

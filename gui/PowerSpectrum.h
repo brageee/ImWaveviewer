@@ -35,7 +35,11 @@ namespace gui
             virtual void UpdateData(std::shared_ptr<SampleSource<std::complex<float>>> src, int &currentSampleIndex) ;
             virtual void UpdateData(std::shared_ptr<SampleSource<float>> src, int &currentSampleIndex);
 
-            //Time Domain variables and parameters
+            //Power spectrum variables and parameters
+            std::string currentSampleIndexStr = ""; // to facility math expressions
+            std::string samplesPerRowStr = ""; // to facility math expressions
+            std::string xPeriodStr = ""; // to facility math expressions
+            std::string xReferenceStr = ""; // to facility math expressions
             int fftSizesList[9] = {64,128,256,512,1024,2048,4096,8192,16384};
             int fftSize = 1024;    
             int fftSizeIndex = 4;
