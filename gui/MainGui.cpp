@@ -323,6 +323,13 @@ void MainGui::Update()
     if(closeApp)
         exit(1);
 
+    if(loadSettings)
+    {
+        if(LoadSettings(settings, settingsFile))
+            fileDialogOpen.SetPwd(settings.defaultPath);
+        loadSettings = false;
+    }    
+
     //Open file
     if(displayFileDialogOpen)
     {
@@ -334,6 +341,8 @@ void MainGui::Update()
     {                        
         //std::cout << "Selected filename" << fileDialogOpen.GetSelected().string() << std::endl;
         fileinfo.filename = fileDialogOpen.GetSelected().string();
+        if(settings.updatePath)
+            SetSettingsPath(fileinfo.filename, settingsFile);
 
         // Try to decode file metadata from filename
         if(getFileMetadata(fileDialogOpen.GetSelected().string(), fileinfo))

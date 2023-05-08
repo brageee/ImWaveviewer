@@ -80,6 +80,11 @@ namespace gui
             std::map<std::string,ImFont*> Fonts;  // font map
             bool UsingDGPU; 
 
+            // Settings
+            Settings settings;
+            bool loadSettings = true;
+            std::string settingsFile = "../build/waveviewer.ini";
+
             //File dialogs etc
             ImGui::FileBrowser fileDialogOpen;
             ImGui::FileBrowser fileDialogSave{ImGuiFileBrowserFlags_EnterNewFilename};

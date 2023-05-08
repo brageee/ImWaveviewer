@@ -22,6 +22,11 @@ struct FileInfo {
     double timestampStart = 0.0;
 };
 
+struct Settings {
+    std::string defaultPath = "";
+    bool updatePath = true;
+};
+
 enum DerivationType {
         INPUT,
         REAL,
