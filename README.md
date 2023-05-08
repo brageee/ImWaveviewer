@@ -1,5 +1,5 @@
 
-ImWaveviewer is a tool to analyze signals. Builds on Linux and Mac, mainly tested on Ubuntu.
+Waveviewer is a tool to analyze signals. Builds on Linux and Mac, mainly tested on Ubuntu.
 
 ## Installation and dependencies ##
 
@@ -20,9 +20,9 @@ cd liquid-dsp
 make  
 sudo make install  
 
-Install ImWaveviewer:  
-git clone --recursive-submodules https://github.com/brageee/ImWaveviewer  
-cd ImWaveviewer  
+Install Waveviewer:  
+git clone --recursive-submodules https://github.com/brageee/Waveviewer  
+cd Waveviewer  
 mkdir build  
 cd build  
 cmake ..  
