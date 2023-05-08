@@ -185,7 +185,7 @@ MainGui::MainGui(std::string title, int w, int h)
     //images[0] = load_icon("my_icon.png");
     //images[1] = load_icon("my_icon_small.png");
     GLFWimage images[1]; 
-    images[0].pixels = stbi_load("../gui/Icon/psd_small.png", &images[0].width, &images[0].height, 0, 4); //rgba channels 
+    images[0].pixels = stbi_load("../gui/Images/psd_small.png", &images[0].width, &images[0].height, 0, 4); //rgba channels 
     glfwSetWindowIcon(Window, 1, images); 
     stbi_image_free(images[0].pixels);
 
