@@ -49,7 +49,7 @@ Waveviewer can also perform some processing on signals. For instance filtering o
 ## Credits ##
 This project uses code from many projects. GUI uses https://github.com/ocornut/imgui and https://github.com/epezent/implot that have made plotting super easy. Original project was inspired by implot's demos https://github.com/epezent/implot_demos.  I also use https://github.com/AirGuanZ/imgui-filebrowser as file browser.
 
-Many processing operations uses https://github.com/jgaeddert/liquid-dsp, the best DSP library out there. 
+Many processing operations uses https://github.com/jgaeddert/liquid-dsp, the best DSP library out there. I use https://www.fftw.org/ for FFTs.
 
 The concept of sample sources was inspired by https://github.com/miek/inspectrum. 
 
