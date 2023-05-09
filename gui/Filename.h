@@ -11,7 +11,7 @@
 #include <vector>
 #include <regex>
 #include <ctime>
-#include "StringTools.h"
+//#include "StringTools.h"
 #include "../processing/Structs.h"
 
 namespace gui
@@ -61,7 +61,7 @@ namespace gui
                 
 
                 // Convert rate from filename
-                if(!is_number(sm[3].str()))
+                if(!isNumber(sm[3].str()))
                 {
                     // Could not detect sample rate. Filename is not a valid king file
                     return false;
@@ -83,7 +83,7 @@ namespace gui
                 fm.sampleRate = sampleRate;
 
                 // Convert frequency from filename
-                if(!is_number(sm[5].str()))
+                if(!isNumber(sm[5].str()))
                 {
                     // Could not detect frequency. Filename is not a valid king file
                     return false;
@@ -150,11 +150,11 @@ namespace gui
         //Put together filename
         if(comment != "")
         {
-            fname = timestampString + "_" + formatSIValue(sampleRate) + "SPS_" + formatSIValue(frequency) + "Hz_" + comment + "." + fileTypeExtension;
+            fname = timestampString + "_" + formatSIValue(sampleRate,6) + "SPS_" + formatSIValue(frequency,6) + "Hz_" + comment + "." + fileTypeExtension;
         }
         else
         {
-            fname = timestampString + "_" + formatSIValue(sampleRate) + "SPS_" + formatSIValue(frequency) + "Hz." + fileTypeExtension;
+            fname = timestampString + "_" + formatSIValue(sampleRate,6) + "SPS_" + formatSIValue(frequency,6) + "Hz." + fileTypeExtension;
         }
         
         return fname;

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include "Structs.h"
+#include <iomanip>
 #include <map>
 
 typedef exprtk::expression<double> expression_t;
@@ -27,5 +28,9 @@ namespace gui
     bool SetSettingsPath(std::string path, std::string filename);
 
     bool CreateConfig(std::vector<std::string> &lines, std::map<std::string, std::string> &settingsMap);
+
+    bool isNumber(const std::string& s);
+
+    std::string formatSIValue(double value, unsigned int decimals);
 
 }
