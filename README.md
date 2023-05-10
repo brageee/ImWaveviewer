@@ -56,3 +56,5 @@ The concept of sample sources was inspired by https://github.com/miek/inspectrum
 The Spectrogram plot domain uses a Largest-Triangle-Three-Buckets algorithm for visual downsampling that I got from https://github.com/parkertomatoes/lttb-cpp.
 
 The OFDM equalizer contains a spline interpolator obtained from https://kluge.in-chemnitz.de/opensource/spline/.
+
+Some fields such as Sample index and Samples/Row can be evaluated (e.g. 10*2+5 = 25). I have used https://github.com/ArashPartow/exprtk expression evaluator.
