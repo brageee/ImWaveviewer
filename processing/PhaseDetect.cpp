@@ -29,7 +29,7 @@ void PhaseDetect<float>::Work(void* input, void* output, int count, size_t sampl
 {
     auto in = static_cast<std::vector<float>*>(input);
     auto out = static_cast<std::vector<float>*>(output);    
-    for (size_t i = 1; i < count; i++)
+    for (size_t i = 0; i < count; i++)
     {                
         std::complex<float> t = std::complex(in->at(i),0.0f);
         out->at(i) = -std::arg(t);                
@@ -41,7 +41,7 @@ void PhaseDetect<std::complex<float>>::Work(void* input, void* output, int count
 {
     auto in = static_cast<std::vector<std::complex<float>>*>(input);
     auto out = static_cast<std::vector<float>*>(output);        
-    for (size_t i = 1; i < count; i++)
+    for (size_t i = 0; i < count; i++)
     {                
         out->at(i) = -std::arg(in->at(i));                
     }     

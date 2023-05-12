@@ -17,7 +17,6 @@ FilterProc<float>::FilterProc(std::shared_ptr<SampleSource<float>> src, FilterVa
         InitRealFilterFromBw();
     else
         InitRealFilterFromTaps(vars.realTaps);
-    //this->SetHistory(h_len);   
 }
 
 
@@ -33,8 +32,7 @@ FilterProc<std::complex<float>>::FilterProc(std::shared_ptr<SampleSource<std::co
     else if(vars.filterType == 1)
         InitComplexFilterFromTaps(vars.realTaps);
     else
-        InitComplexFilterFromTaps(vars.complexTaps);
-    //this->SetHistory(h_len);        
+        InitComplexFilterFromTaps(vars.complexTaps);   
 }
 
 template <typename T>
@@ -49,12 +47,14 @@ void FilterProc<T>::InitRealFilterFromBw()
         h[i] *= cosf(2*M_PI*argument);        
     }    
     realFilter = firfilt_rrrf_create(h, h_len);
+    this->SetHistory(h_len);   
 }
 
 template <typename T>
 void FilterProc<T>::InitRealFilterFromTaps(std::vector<float> taps) 
 {            
     realFilter = firfilt_rrrf_create(taps.data(), taps.size());
+    this->SetHistory(taps.size());   
 }
 
 template <typename T>
@@ -72,6 +72,7 @@ void FilterProc<T>::InitComplexFilterFromBw()
     }    
     complexFilter = firfilt_cccf_create(hc.data(), h_len); 
     complexTaps = true;
+    this->SetHistory(h_len);   
 }
 
 
@@ -80,6 +81,7 @@ void FilterProc<T>::InitComplexFilterFromTaps(std::vector<float> taps)
 {            
     complexFilterRealTaps = firfilt_crcf_create(taps.data(), taps.size());
     complexTaps = false;
+    this->SetHistory(taps.size());   
 }
 
 template <typename T>
@@ -87,6 +89,7 @@ void FilterProc<T>::InitComplexFilterFromTaps(std::vector<std::complex<float>> t
 {            
     complexFilter = firfilt_cccf_create(taps.data(), taps.size());   
     complexTaps = true; 
+    this->SetHistory(taps.size());   
 }
 
 template <typename T>
@@ -98,13 +101,13 @@ FilterProc<T>::~FilterProc()
 template <>
 FilterProc<std::complex<float>>::~FilterProc() 
 {
-    //iirfilt_crcf_destroy(ic);    
+    
 }
 
 template <>
 FilterProc<float>::~FilterProc() 
 {
-    //iirfilt_rrrf_destroy(ir);
+    
 }
 
 template <typename T>

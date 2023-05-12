@@ -9,14 +9,14 @@ FMDetect<T>::FMDetect(std::shared_ptr<SampleSource<T>> src)
 template <>
 FMDetect<float>::FMDetect(std::shared_ptr<SampleSource<float>> src) : SampleProc(src)
 {
-
+    this->SetHistory(1);
 }
 
 
 template <>
 FMDetect<std::complex<float>>::FMDetect(std::shared_ptr<SampleSource<std::complex<float>>> src) : SampleProc(src)
 {
-    
+    this->SetHistory(1);
 }
 
 template <typename T>
@@ -31,6 +31,7 @@ void FMDetect<float>::Work(void* input, void* output, int count, size_t sampleid
     auto out = static_cast<std::vector<float>*>(output);
     float prev, current; 
     prev = in->at(0);
+    out->at(0) = 0.0f;
     for (size_t i = 1; i < count; i++)
     {        
         current = in->at(i);
@@ -47,6 +48,7 @@ void FMDetect<std::complex<float>>::Work(void* input, void* output, int count, s
     auto out = static_cast<std::vector<float>*>(output);    
     std::complex<float> prev, current; 
     prev = in->at(0);
+    out->at(0) = 0.0f;
     for (size_t i = 1; i < count; i++)
     {        
         current = in->at(i);        
