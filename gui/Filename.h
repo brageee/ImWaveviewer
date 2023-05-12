@@ -256,7 +256,7 @@ namespace gui
             {
                 std::string letter = "[kMG]";
                 std::smatch smm;
-                float scale = 0.0f;
+                float scale = 1.0f;
                 if (std::regex_search (sampleRateStr, smm, std::regex(letter) ))
                 {
                     if(smm.str() == "k") scale = 1000.0f;

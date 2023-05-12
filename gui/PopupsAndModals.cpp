@@ -92,7 +92,7 @@ namespace gui
             if(vars.filterType != 0)    ImGui::BeginDisabled();            
             ImGui::Text("Center freq:"); ImGui::SameLine();
             ImGui::InputDouble("##center", &vars.centerFreq);          
-            ImGui::Text("Cutoff"); ImGui::SameLine();              
+            ImGui::Text("Pass bandwidth"); ImGui::SameLine();              
             ImGui::InputDouble("##cutoff", &vars.cutoff);  
             ImGui::Text("Stop-band attenuation [dB]"); ImGui::SameLine();              
             ImGui::InputDouble("##att", &vars.attenuation); 
@@ -119,6 +119,8 @@ namespace gui
             {                            
                 show = false;
                 configured = true;
+                double tmp = vars.cutoff;
+                vars.cutoff = tmp/2.0f; //this is how it is passed to FilterProc
                 if(vars.filterType == 1)
                 {
                     std::istringstream ss(vars.realTapsChar);

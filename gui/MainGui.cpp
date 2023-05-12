@@ -326,7 +326,10 @@ void MainGui::Update()
     if(loadSettings)
     {
         if(LoadSettings(settings, settingsFile))
+        {
             fileDialogOpen.SetPwd(settings.defaultPath);
+            fileDialogSave.SetPwd(settings.defaultPath);
+        }
         loadSettings = false;
     }    
 
