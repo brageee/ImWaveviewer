@@ -38,7 +38,8 @@ void FreqShift<float>::Work(void* input, void* output, int count, size_t samplei
 {
     auto in = static_cast<std::vector<float>*>(input);
     auto out = static_cast<std::vector<float>*>(output);
-    float theta = prevPhase;    
+    float theta = 0.0f;
+    if(keepPhaseRef) theta = prevPhase;    
     float thetaInc = 2*float(M_PI)*normShift;
     for (size_t i = 0; i < count; i++)
     {        
@@ -57,7 +58,8 @@ void FreqShift<std::complex<float>>::Work(void* input, void* output, int count, 
 {
     auto in = static_cast<std::vector<std::complex<float>>*>(input);
     auto out = static_cast<std::vector<std::complex<float>>*>(output);    
-    float theta = prevPhase; 
+    float theta = 0.0f;
+    if(keepPhaseRef) theta = prevPhase;    
     float thetaInc = 2*float(M_PI)*normShift;
     for (size_t i = 1; i < count; i++)
     {        

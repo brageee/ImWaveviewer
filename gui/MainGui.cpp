@@ -374,6 +374,15 @@ void MainGui::Update()
     if(displayFileDialogSave)
     {
         std::string s = deriveSignalSource->GetName();
+        //Remove -> and insert . instead
+        std::string tmp = s;
+        while (tmp.find_first_of("-") != std::string::npos)
+        {
+            std::string substr0 = tmp.substr(0,tmp.find_first_of("-"));
+            std::string substr1 = tmp.substr(tmp.find_first_of("-")+2);
+            tmp = substr0+"."+substr1;
+        }
+        s = tmp;
         if(deriveSignalSource->RealSignal())
             s += ".real";
         else
@@ -620,6 +629,7 @@ void MainGui::TreeStructureContextMenu(std::shared_ptr<AbstractSampleSource> src
         if(ImGui::MenuItem("Save signal"))
         {
             deriveSignalSource = src;
+            derivationType = src->GetSourceType();
             displayFileDialogSave = true;
             showPopup = true;
         }
@@ -874,40 +884,86 @@ void MainGui::SaveSignal()
     int numSamples = (rangeMax < 0) ? deriveSignalSource->Count() : rangeMax-rangeMin;    
     if(!deriveSignalSource->RealSignal())
     {
-        int sampleSize = 8; //complex<float>
-        std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(deriveSignalSource);
-        int numBlocks;
-        if(numSamples == concrete->GetSaveSize())
-            numBlocks = 1;
-        else
-            numBlocks = numSamples / concrete->GetSaveSize() + 1;        
-        int start = rangeMin;
-        for (size_t i = 0; i < numBlocks; i++)
+        int sampleSize = 8; //complex<float>        
+        if(derivationType == FREQSHIFT)
         {
-            int length = std::min(concrete->GetSaveSize(), numSamples);
-            auto samples = concrete->GetSamples(start, length);
-            start += length;
-            numSamples -= length;
-            ob.write(reinterpret_cast<const char*>(samples->data()), length*sampleSize);
+            //Special case where we want to keep phase reference through save operation
+            std::shared_ptr<FreqShift<std::complex<float>>> concrete = std::dynamic_pointer_cast<FreqShift<std::complex<float>>>(deriveSignalSource);
+            concrete->KeepPhaseReference(true);
+            int numBlocks;
+            if(numSamples == concrete->GetSaveSize())
+                numBlocks = 1;
+            else
+                numBlocks = numSamples / concrete->GetSaveSize() + 1;        
+            int start = rangeMin;
+            for (size_t i = 0; i < numBlocks; i++)
+            {
+                int length = std::min(concrete->GetSaveSize(), numSamples);
+                auto samples = concrete->GetSamples(start, length);
+                start += length;
+                numSamples -= length;
+                ob.write(reinterpret_cast<const char*>(samples->data()), length*sampleSize);
+            }
+            concrete->KeepPhaseReference(false);
+        } else
+        {
+            std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(deriveSignalSource);
+            int numBlocks;
+            if(numSamples == concrete->GetSaveSize())
+                numBlocks = 1;
+            else
+                numBlocks = numSamples / concrete->GetSaveSize() + 1;        
+            int start = rangeMin;
+            for (size_t i = 0; i < numBlocks; i++)
+            {
+                int length = std::min(concrete->GetSaveSize(), numSamples);
+                auto samples = concrete->GetSamples(start, length);
+                start += length;
+                numSamples -= length;
+                ob.write(reinterpret_cast<const char*>(samples->data()), length*sampleSize);
+            }
         }
         
     } else
     {
         int sampleSize = 4; //float
-        std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(deriveSignalSource);
-        int numBlocks;
-        if(numSamples == concrete->GetSaveSize())
-            numBlocks = 1;
-        else
-            numBlocks = numSamples / concrete->GetSaveSize() + 1; 
-        int start = rangeMin;
-        for (size_t i = 0; i < numBlocks; i++)
+        if(derivationType == FREQSHIFT)
         {
-            int length = std::min(concrete->GetSaveSize(), numSamples);
-            auto samples = concrete->GetSamples(start, length);
-            start += length;
-            numSamples -= length;
-            ob.write(reinterpret_cast<const char*>(samples->data()), length*sampleSize);
+            //Special case where we want to keep phase reference through save operation
+            std::shared_ptr<FreqShift<float>> concrete = std::dynamic_pointer_cast<FreqShift<float>>(deriveSignalSource);
+            concrete->KeepPhaseReference(true);
+            int numBlocks;
+            if(numSamples == concrete->GetSaveSize())
+                numBlocks = 1;
+            else
+                numBlocks = numSamples / concrete->GetSaveSize() + 1; 
+            int start = rangeMin;
+            for (size_t i = 0; i < numBlocks; i++)
+            {
+                int length = std::min(concrete->GetSaveSize(), numSamples);
+                auto samples = concrete->GetSamples(start, length);
+                start += length;
+                numSamples -= length;
+                ob.write(reinterpret_cast<const char*>(samples->data()), length*sampleSize);
+            }
+            concrete->KeepPhaseReference(false);
+        } else
+        {        
+            std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(deriveSignalSource);
+            int numBlocks;
+            if(numSamples == concrete->GetSaveSize())
+                numBlocks = 1;
+            else
+                numBlocks = numSamples / concrete->GetSaveSize() + 1; 
+            int start = rangeMin;
+            for (size_t i = 0; i < numBlocks; i++)
+            {
+                int length = std::min(concrete->GetSaveSize(), numSamples);
+                auto samples = concrete->GetSamples(start, length);
+                start += length;
+                numSamples -= length;
+                ob.write(reinterpret_cast<const char*>(samples->data()), length*sampleSize);
+            }
         }
     }
     ob.close();
