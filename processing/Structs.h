@@ -38,7 +38,8 @@ enum DerivationType {
         RESAMPLE,
         FILTER,
         DDC,
-        OFDMDEMOD
+        OFDMDEMOD,
+        TAKESKIP
 };
 
 
@@ -110,4 +111,12 @@ struct OFDMDemodVars{
     char pilotsChar[1000] ;
     bool pilotCarrierEq = false;
     int numSymsToEstimateOffset = 100;
+};
+
+struct TakeSkipVars {
+    std::string str;
+    char chr[1000];
+    std::vector<int> pattern;
+    int sampleReference;
+    bool specifySampleReference = false;
 };

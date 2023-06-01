@@ -306,4 +306,136 @@ namespace gui
         }
         return true;
     }
+
+    bool ParseTakeSkipString(TakeSkipVars &vars)
+    {
+        /* Keywords
+        t = take
+        s = skip
+        d = insert 0
+        ()X = do content of () X times
+        Example:
+        (t1s1)5s5 = take 1, skip 1 sample 5 times and then skip 5 samples and repeat
+        */
+        bool result = true;        
+        std::cout << vars.str << std::endl; 
+        std::vector<std::string> cmds;
+        std::vector<int> reps;
+        std::string str = vars.str;
+        ExtractCommands(str, cmds, reps);
+        vars.pattern = CommandsToPattern(cmds, reps);
+        //Convert TakeSkipParserVar to take skip pattern
+
+        return result;
+    }
+
+    void ExtractCommands(std::string &tmp, std::vector<std::string> &cmds, std::vector<int> &reps)
+    {        
+        int pos = tmp.find_first_of("(");
+        while (pos != std::string::npos)
+        {
+            //Check if there is command preceding (
+            if(pos != 0)
+            {
+                //Add this command
+                std::string cmd = tmp.substr(0,pos);
+                cmds.push_back(cmd);
+                reps.push_back(1);
+                //std::cout << "Adding " << cmd << ", repeated " << 1 << " time" << std::endl;
+                //Update tmp string and pos
+                std::string rest = tmp.substr(pos, std::string::npos);
+                tmp = rest;
+                pos = tmp.find_first_of("(");
+            } else
+            {
+                //Find next ), add substring to TakeSkipParserVar and remove that part from tmp
+                int posNext = tmp.find(")");
+                if(posNext != std::string::npos)
+                {
+                    std::string cmd = tmp.substr(pos+1, posNext-1);
+                    std::string rest = tmp.substr(posNext+1,std::string::npos);
+                    //std::cout << "Remainder " << rest << std::endl;
+                    //Extract repetition value
+                    int rep = 1;
+                    pos = FindDelimiter(rest);                    
+                    rep = std::atoi(rest.substr(0,pos).c_str());
+                    if(rep == 0)
+                        rep = 1;
+                    cmds.push_back(cmd);
+                    reps.push_back(rep);
+                    //std::cout << "Adding " << cmd << ", repeated " << rep << " times" << std::endl;
+                    tmp = rest.substr(pos, std::string::npos);
+                    pos = tmp.find_first_of("(");                           
+                } else
+                {
+                    //Return false, could not find corresponding parenthesis
+                }           
+            }
+        }
+        if(tmp.length()>0)
+        {
+            cmds.push_back(tmp);
+            reps.push_back(1);
+        }
+    }
+
+    std::vector<int> CommandsToPattern(std::vector<std::string> &cmds, std::vector<int> &reps)
+    {
+        std::vector<int> pattern;
+        int value = 0;
+        int rep = 1;
+        for (size_t i = 0; i < cmds.size(); i++)
+        {
+            std::string cmd = cmds[i];
+            int pos = 0;
+            std::vector<int> tmpPattern;
+            while (pos < cmd.length())
+            {
+                if(cmd[pos] == 't')
+                    value = 1;
+                else if (cmd[pos] == 's')
+                    value = 0;
+                else if (cmd[pos] == 'd')
+                    value = 2;
+                int delPos = FindDelimiter(cmd.substr(pos+1,std::string::npos));
+                rep = std::atoi(cmd.substr(pos+1,delPos).c_str());
+                if(rep<1)
+                    std::cout << "Error parsing command" << std::endl;
+                else
+                {
+                    for (size_t j = 0; j < rep; j++)
+                    {
+                        tmpPattern.push_back(value);
+                    }                
+                }
+                pos += delPos+1;
+            }
+            for (size_t j = 0; j < reps[i]; j++)
+            {
+                for (auto v : tmpPattern)
+                {
+                    pattern.push_back(v);
+                }            
+            }        
+        }
+        return pattern;
+    }
+
+    int FindDelimiter(std::string str)
+    {
+        int pos = str.length();
+        int pos1 = str.find_first_of("(");
+        int pos2 = str.find_first_of("t");
+        int pos3 = str.find_first_of("s");
+        int pos4 = str.find_first_of("d");                                                   
+        if(pos1 > 0)    
+            pos = pos1;
+        if(pos2 < pos && pos2 > 0)
+            pos = pos2;
+        if(pos3 < pos && pos3 > 0)
+            pos = pos3;
+        if(pos3 < pos && pos4 > 0)
+            pos = pos4;
+        return pos;
+    }
 } // namespace gui

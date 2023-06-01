@@ -36,6 +36,7 @@
 #include "FilterProc.h"
 #include "DDC.h"
 #include "OFDMDemod.h"
+#include "TakeSkip.h"
 #include "Structs.h"
 #include "Filename.h"
 
@@ -124,6 +125,7 @@ namespace gui
             bool showResampleWindow = false;
             bool showFilterWindow = false;
             bool showDDCWindow = false;
+            bool showTakeSkipWindow = false;
             bool freqShiftConfigured = false;
             bool showOFDMDemodWindow = false;
             bool ofdmDemodConfigured = false;
@@ -136,6 +138,7 @@ namespace gui
             //double ofdmSymbolStart = 0.0f;
             //int ofdmSampleReference = 0;
             //int ofdmNumSymsToEstimateFreqShift = 100;
+            TakeSkipVars takeSkipVars;
             double freqShift = 0.0f;
             double freqShiftTemp = 0.0f;
             double outputRate = 0.0f;

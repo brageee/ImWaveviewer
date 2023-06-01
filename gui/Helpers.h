@@ -33,4 +33,12 @@ namespace gui
 
     std::string formatSIValue(double value, unsigned int decimals);
 
+    bool ParseTakeSkipString(TakeSkipVars &vars);
+
+    void ExtractCommands(std::string &tmp, std::vector<std::string> &cmds, std::vector<int> &reps);
+
+    std::vector<int> CommandsToPattern(std::vector<std::string> &cmds, std::vector<int> &reps);
+
+    int FindDelimiter(std::string str);
+
 }

@@ -231,7 +231,7 @@ namespace gui
         }
     }
 
-    void ShowOFDMDemodMenu(OFDMDemodVars &vars, bool &ofdmEnableCustomSampleReference, bool &showOFDMDemodWindow, bool &ofdmDemodConfigured)
+    void ShowOFDMDemodMenu(OFDMDemodVars &vars, bool &ofdmEnableCustomSampleReference, bool &show, bool &configured)
     {
         ImGui::OpenPopup("OFDM demod");      
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -272,8 +272,8 @@ namespace gui
             if(!vars.pilotCarrierEq) ImGui::EndDisabled();
             if (ImGui::Button("OK"))
             {                            
-                showOFDMDemodWindow = false;
-                ofdmDemodConfigured = true;
+                show = false;
+                configured = true;
                 std::stringstream ss(vars.pilotsChar);
                 vars.pilotCarrierIndices.clear();
                 for (int i; ss >> i;) {
@@ -288,14 +288,53 @@ namespace gui
             }
             ImGui::SameLine();
             if (ImGui::Button("Cancel"))
-            {        
-                //shift = 0.0f;
-                showOFDMDemodWindow = false;
-                ofdmDemodConfigured = false;
+            {                        
+                show = false;
+                configured = false;
                 ImGui::CloseCurrentPopup();                                
             }
             ImGui::EndPopup();   
         }
+    }
+
+    void ShowTakeSkipMenu(TakeSkipVars &vars, bool &show, bool &configured, bool &showError, std::string &errorMsg)
+    {
+        ImGui::OpenPopup("Take/skip");      
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));    
+        if(ImGui::BeginPopupModal("Take/skip"))
+        {
+            ImGui::InputText("##takeskip", vars.chr, 1000);
+            ImGui::Checkbox("Custom sample ref", &vars.specifySampleReference);
+            if(!vars.specifySampleReference)
+                ImGui::BeginDisabled();            
+            ImGui::Text("Sample index reference"); ImGui::SameLine();              
+            ImGui::InputInt("##sampleref", &vars.sampleReference);          
+            if(!vars.specifySampleReference)
+                ImGui::EndDisabled();                   
+            if (ImGui::Button("OK"))
+            {                 
+                std::stringstream tmp(vars.chr);
+                vars.str = tmp.str();
+                bool b = ParseTakeSkipString(vars);
+                if(!b)
+                {
+                    showError = true;
+                    errorMsg = "Error parsing take/skip command";
+                    configured = false;
+                } else
+                    configured = true;
+                show = false;
+                ImGui::CloseCurrentPopup();      
+            }
+            if (ImGui::Button("Cancel"))
+            {                        
+                show = false;
+                configured = false;
+                ImGui::CloseCurrentPopup();                                
+            }
+            ImGui::EndPopup();   
+        }            
     }
     
 

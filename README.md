@@ -46,6 +46,15 @@ Waveviewer can also perform some processing on signals. For instance filtering o
 
 <img src="gui/Images/screenshot2.png" alt="Power spectrum" width="400" height="264">
 
+#### Take / skip ####
+This operation uses different key characters to specify a pattern of keeping, skipping and inserting (0s) samples. 
+- tX keeps X samples
+- sX drops X samples
+- dX inserts X zeros
+- ()X repeats command in parenthesis X times
+
+For instance t1s1 keeps one sample and skips the next, and repeats. In an OFDM signal with 64 FFT, perhaps the first and last 4 samples are empty. These can then be dropped by s4t56s4. If every 8th sample in the remaining 56 samples are pilots that you want to drop you can modify the command to s4(t7s1)7s4.
+
 ## Credits ##
 This project uses code from many projects. GUI uses https://github.com/ocornut/imgui and https://github.com/epezent/implot that have made plotting super easy. Original project was inspired by implot's demos https://github.com/epezent/implot_demos.  I also use https://github.com/AirGuanZ/imgui-filebrowser as file browser.
 

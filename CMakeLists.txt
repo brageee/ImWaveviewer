@@ -125,6 +125,7 @@ list(APPEND project_sources
   processing/DDC.cpp
   processing/OFDMDemod.cpp
   processing/Utils.cpp
+  processing/TakeSkip.cpp
   gui/Fonts/FontAwesome5.cpp
   gui/Fonts/FontAwesome5Brands.cpp
   gui/Fonts/RobotoBold.cpp

@@ -5,7 +5,7 @@
 #include "imgui_internal.h"
 //#include "implot.h"
 #include "Structs.h"
-
+#include "Helpers.h"
 #include "IO.h"
 
 using namespace std;
@@ -25,7 +25,9 @@ namespace gui
 
     void ShowDDCMenu(double* centerFreq, double* outputRate,  double* cutoff, double* attenuation, bool &show, bool &configured);
 
-    void ShowOFDMDemodMenu(OFDMDemodVars &vars, bool &ofdmEnableCustomSampleReference, bool &showOFDMDemodWindow, bool &ofdmDemodConfigured);
+    void ShowOFDMDemodMenu(OFDMDemodVars &vars, bool &ofdmEnableCustomSampleReference, bool &show, bool &configured);
+
+    void ShowTakeSkipMenu(TakeSkipVars &vars, bool &show, bool &configured, bool &showError, std::string &errorMsg);
     
     void ShowReconfigureWarning(bool &parse);
 }

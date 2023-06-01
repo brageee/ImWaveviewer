@@ -151,7 +151,7 @@ MainGui::MainGui(std::string title, int w, int h)
     const bool use_msaa = false;
 
     if (use_msaa) {
-        title += " - 4X MSAA";
+        //title += " - 4X MSAA";
         glfwWindowHint(GLFW_SAMPLES, 4);
     }
 
@@ -176,8 +176,8 @@ MainGui::MainGui(std::string title, int w, int h)
     const GLubyte* vendor = glGetString(GL_VENDOR); 
     const GLubyte* renderer = glGetString(GL_RENDERER); 
 
-    title +=  " - ";
-    title += reinterpret_cast< char const * >(renderer);
+    //title +=  " - ";
+    //title += reinterpret_cast< char const * >(renderer);
     glfwSetWindowTitle(Window, title.c_str());
 
     //Set window icon
@@ -185,7 +185,7 @@ MainGui::MainGui(std::string title, int w, int h)
     //images[0] = load_icon("my_icon.png");
     //images[1] = load_icon("my_icon_small.png");
     GLFWimage images[1]; 
-    images[0].pixels = stbi_load("../gui/Images/psd_small.png", &images[0].width, &images[0].height, 0, 4); //rgba channels 
+    images[0].pixels = stbi_load("../gui/Images/scatter.png", &images[0].width, &images[0].height, 0, 4); //rgba channels 
     glfwSetWindowIcon(Window, 1, images); 
     stbi_image_free(images[0].pixels);
 
@@ -512,95 +512,113 @@ void MainGui::TreeStructureContextMenu(std::shared_ptr<AbstractSampleSource> src
     std::string s = std::to_string(src->GetID());
     if (ImGui::BeginPopupContextItem(s.c_str())) // <-- use last item id as popup id
     {                
-        //ImGui::Text("Add derived plots from %s", derivedSignals[i]->GetName().c_str());
-        //FrequencyShiftStruct s;
-        if(ImGui::MenuItem("Real"))
+        if (ImGui::BeginMenu("Traces"))
         {
-            deriveSignal = true;
-            deriveSignalSource = src;
-            derivationType = REAL;
-        }
-        if(!src->RealSignal())
-        {
-            if(ImGui::MenuItem("Imag"))
+            if(ImGui::MenuItem("Real"))
             {
                 deriveSignal = true;
                 deriveSignalSource = src;
-                derivationType = IMAG;
+                derivationType = REAL;
             }
-        }
-        if(ImGui::MenuItem("AM detect"))
+            if(!src->RealSignal())
+            {
+                if(ImGui::MenuItem("Imag"))
+                {
+                    deriveSignal = true;
+                    deriveSignalSource = src;
+                    derivationType = IMAG;
+                }
+            }
+            if(ImGui::MenuItem("AM detect"))
+            {
+                deriveSignal = true;
+                deriveSignalSource = src;
+                derivationType = AM;
+            }
+            if(ImGui::MenuItem("FM detect"))
+            {
+                deriveSignal = true;
+                deriveSignalSource = src;
+                derivationType = FM;
+            }
+            if(ImGui::MenuItem("Phase detect"))
+            {
+                deriveSignal = true;
+                deriveSignalSource = src;
+                derivationType = PHASE;             
+            }
+            if(ImGui::MenuItem("Take/skip"))
+            {
+                showTakeSkipWindow = true;
+                showPopup = true;            
+                deriveSignalSource = src;
+                derivationType = TAKESKIP;
+                takeSkipVars.sampleReference = currentSampleIndex;
+            }
+            ImGui::EndMenu();
+        }        
+        //ImGui::Separator();
+        if (ImGui::BeginMenu("Filter / shift"))
         {
-            deriveSignal = true;
-            deriveSignalSource = src;
-            derivationType = AM;
-        }
-        if(ImGui::MenuItem("FM detect"))
-        {
-            deriveSignal = true;
-            deriveSignalSource = src;
-            derivationType = FM;
-        }
-        if(ImGui::MenuItem("Phase detect"))
-        {
-            deriveSignal = true;
-            deriveSignalSource = src;
-            derivationType = PHASE;             
-        }
-        ImGui::Separator();
-        if(ImGui::MenuItem("Frequency shift"))
-        {
-            //showError = true;
-            //errorMsg = "Not implemented yet!";
-            showFreqShiftWindow = true; 
-            derivationType = FREQSHIFT;
-            deriveSignalSource = src;
-            showPopup = true;
-        }                            
-        if(ImGui::MenuItem("Resample"))
-        {
-            showResampleWindow = true; 
-            derivationType = RESAMPLE;
-            deriveSignalSource = src;
-            showPopup = true;
-        }
-        if(ImGui::MenuItem("Filter"))
-        {
-            //showError = true;
-            //errorMsg = "Not implemented yet!";
-            showFilterWindow = true;
-            deriveSignalSource = src;
-            derivationType = FILTER;
-            outputRate = deriveSignalSource->Rate()/2;
-            cutoff = deriveSignalSource->Rate()/10;
-            showPopup = true;
-        }
-        if(ImGui::MenuItem("DDC"))
-        {
-            //showError = true;
-            //errorMsg = "Not implemented yet!";
-            showDDCWindow = true;
-            deriveSignalSource = src;
-            derivationType = DDC;
-            outputRate = deriveSignalSource->Rate()/2;
-            cutoff = deriveSignalSource->Rate()/10;
-            showPopup = true;
-        }
-        if(!src->RealSignal())
-        {
-            ImGui::Separator();
-            if(ImGui::MenuItem("OFDM Demod"))
+            if(ImGui::MenuItem("Frequency shift"))
             {
                 //showError = true;
                 //errorMsg = "Not implemented yet!";
-                showOFDMDemodWindow = true;
+                showFreqShiftWindow = true; 
+                derivationType = FREQSHIFT;
                 deriveSignalSource = src;
-                derivationType = OFDMDEMOD;
-                ofdmDemodVars.sampleReference = currentSampleIndex;
-                //ofdmSampleReference = currentSampleIndex;            
+                showPopup = true;
+            }                            
+            if(ImGui::MenuItem("Resample"))
+            {
+                showResampleWindow = true; 
+                derivationType = RESAMPLE;
+                deriveSignalSource = src;
                 showPopup = true;
             }
-        }        
+            if(ImGui::MenuItem("Filter"))
+            {
+                //showError = true;
+                //errorMsg = "Not implemented yet!";
+                showFilterWindow = true;
+                deriveSignalSource = src;
+                derivationType = FILTER;
+                outputRate = deriveSignalSource->Rate()/2;
+                cutoff = deriveSignalSource->Rate()/10;
+                showPopup = true;
+            }
+            if(ImGui::MenuItem("DDC"))
+            {
+                //showError = true;
+                //errorMsg = "Not implemented yet!";
+                showDDCWindow = true;
+                deriveSignalSource = src;
+                derivationType = DDC;
+                outputRate = deriveSignalSource->Rate()/2;
+                cutoff = deriveSignalSource->Rate()/10;
+                showPopup = true;
+            }
+            ImGui::EndMenu();
+        }
+        if(!src->RealSignal())
+        {
+            //ImGui::Separator();
+            if (ImGui::BeginMenu("Demod"))
+            {                
+                if(ImGui::MenuItem("OFDM"))
+                {
+                    //showError = true;
+                    //errorMsg = "Not implemented yet!";
+                    showOFDMDemodWindow = true;
+                    deriveSignalSource = src;
+                    derivationType = OFDMDEMOD;
+                    ofdmDemodVars.sampleReference = currentSampleIndex;
+                    //ofdmSampleReference = currentSampleIndex;            
+                    showPopup = true;
+                }
+                ImGui::EndMenu();
+            }
+        }                
         ImGui::Separator();
         if(src->CanReconfigure())
         {
@@ -621,6 +639,8 @@ void MainGui::TreeStructureContextMenu(std::shared_ptr<AbstractSampleSource> src
                     showDDCWindow = true;
                 else if(derivationType == OFDMDEMOD)
                     showOFDMDemodWindow = true;
+                else if(derivationType == TAKESKIP)
+                    showTakeSkipWindow = true;
                 reconfigure = true;
                 showPopup = true;
             }
@@ -1252,6 +1272,33 @@ void MainGui::DeriveSignal()
             std::cout << "Cannot perform OFDM demod for real signals" << std::endl;
         }                   
     }
+    if(derivationType == TAKESKIP)
+    {
+        //std::cout << "Adding filter sub signal" << std::endl;
+        if(!deriveSignalSource->RealSignal())
+        {
+            std::shared_ptr<SampleSource<std::complex<float>>> concrete = std::dynamic_pointer_cast<SampleSource<std::complex<float>>>(deriveSignalSource);
+            auto takeSkipSrc = std::make_shared<TakeSkip<std::complex<float>>>(concrete, takeSkipVars);
+            std::string name = concrete->GetName()+"->"+takeSkipVars.str;          
+            takeSkipSrc->SetName(name);
+            takeSkipSrc->SetRealSignal(false);
+            takeSkipSrc->SetRate(concrete->Rate());
+            takeSkipSrc->SetReconfigure(true);
+            takeSkipSrc->SetSourceType(TAKESKIP);
+            deriveSignalSource->subscribe(takeSkipSrc);
+        } else
+        {
+            std::shared_ptr<SampleSource<float>> concrete = std::dynamic_pointer_cast<SampleSource<float>>(deriveSignalSource);
+            auto takeSkipSrc = std::make_shared<TakeSkip<float>>(concrete,  takeSkipVars);
+            std::string name = concrete->GetName()+"->"+takeSkipVars.str;          
+            takeSkipSrc->SetName(name);
+            takeSkipSrc->SetRealSignal(true);
+            takeSkipSrc->SetRate(concrete->Rate());
+            takeSkipSrc->SetReconfigure(true);
+            takeSkipSrc->SetSourceType(TAKESKIP);
+            deriveSignalSource->subscribe(takeSkipSrc);
+        }  
+    }
     deriveSignal = false;
     deriveSignalSource = nullptr;
 }
@@ -1317,6 +1364,18 @@ void MainGui::ReconfigureSignal()
                 std::shared_ptr<OFDMDemod<std::complex<float>>> concrete = std::dynamic_pointer_cast<OFDMDemod<std::complex<float>>>(deriveSignalSource);
                 concrete->Reconfigure(ofdmDemodVars);
         } 
+    }
+    else if(derivationType == TAKESKIP)
+    {
+        if(!deriveSignalSource->RealSignal())
+        {
+                std::shared_ptr<TakeSkip<std::complex<float>>> concrete = std::dynamic_pointer_cast<TakeSkip<std::complex<float>>>(deriveSignalSource);
+                concrete->Reconfigure(takeSkipVars);
+        } else
+        {
+                std::shared_ptr<TakeSkip<float>> concrete = std::dynamic_pointer_cast<TakeSkip<float>>(deriveSignalSource);
+                concrete->Reconfigure(takeSkipVars);
+        }
     }
     deriveSignal = false;
     reconfigure = false;
@@ -1422,6 +1481,13 @@ void MainGui::HandlePopups()
         //ShowOFDMDemodMenu(&ofdmFFTSize, &ofdmCPLen, &ofdmSymbolStart, &ofdmSampleReference, ofdmInitWithFreqShift, ofdmCPBasedShift, ofdmEnableCustomSampleReference, &ofdmNumSymsToEstimateFreqShift, showOFDMDemodWindow, deriveSignal);
         ShowOFDMDemodMenu(ofdmDemodVars, ofdmEnableCustomSampleReference, showOFDMDemodWindow, deriveSignal);
         if(!showOFDMDemodWindow)
+            showPopup = false;
+    }
+
+    if(showTakeSkipWindow)
+    {
+        ShowTakeSkipMenu(takeSkipVars, showTakeSkipWindow, deriveSignal, showError, errorMsg);
+        if(!showTakeSkipWindow)
             showPopup = false;
     }
 
