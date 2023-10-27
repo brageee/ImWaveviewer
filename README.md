@@ -23,7 +23,7 @@ make
 sudo make install  
 
 Install Waveviewer:  
-git clone --recursive-submodules https://github.com/brageee/Waveviewer  
+git clone --recurse-submodules https://github.com/brageee/Waveviewer  
 cd Waveviewer  
 mkdir build  
 cd build  

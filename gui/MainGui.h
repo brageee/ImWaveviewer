@@ -47,7 +47,7 @@ namespace gui
     {
         public:
             // Constructor.
-            MainGui(std::string title, int w, int h);
+            MainGui(std::string title, int w, int h, std::string inputFile = "");
             // Destructor.
             ~MainGui();        
             //Render
@@ -87,6 +87,7 @@ namespace gui
             std::string settingsFile = "../build/waveviewer.ini";
 
             //File dialogs etc
+            std::string argInputFile = "";
             ImGui::FileBrowser fileDialogOpen;
             ImGui::FileBrowser fileDialogSave{ImGuiFileBrowserFlags_EnterNewFilename};
             bool displayFileDialogOpen = true;
