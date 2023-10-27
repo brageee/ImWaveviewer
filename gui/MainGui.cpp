@@ -123,7 +123,7 @@ void MainGui::StyeColorsApp()
 }
 
 
-MainGui::MainGui(std::string title, int w, int h)
+MainGui::MainGui(std::string title, int w, int h, std::string inputFile)
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -258,6 +258,7 @@ MainGui::MainGui(std::string title, int w, int h)
     Fonts[font_cfg.Name] = io.Fonts->AddFontFromMemoryTTF(RobotoMono_Regular_ttf, RobotoMono_Regular_ttf_len, 15.0f, &font_cfg);
     io.Fonts->AddFontFromMemoryTTF(fa_solid_900_ttf, fa_solid_900_ttf_len, 14.0f, &icons_config, fa_ranges);
     
+    argInputFile = inputFile;
 }
 
 MainGui::~MainGui()
@@ -334,34 +335,41 @@ void MainGui::Update()
     }    
 
     //Open file
-    if(displayFileDialogOpen)
+    if(argInputFile != "")
     {
-        fileDialogOpen.Open();
-        displayFileDialogOpen = false;
-    }
-    fileDialogOpen.Display();
-    if(fileDialogOpen.HasSelected())
-    {                        
-        //std::cout << "Selected filename" << fileDialogOpen.GetSelected().string() << std::endl;
-        fileinfo.filename = fileDialogOpen.GetSelected().string();
-        if(settings.updatePath)
-            SetSettingsPath(fileinfo.filename, settingsFile);
+        fileinfo.filename = argInputFile;
+        if(settings.updatePath) SetSettingsPath(fileinfo.filename, settingsFile);
 
         // Try to decode file metadata from filename
-        if(getFileMetadata(fileDialogOpen.GetSelected().string(), fileinfo))
-        {
-            
-        }
-        else
-        {
+        getFileMetadata(fileinfo.filename, fileinfo);
 
+        inputConfigured = false;
+        showPopup = true;
+
+        argInputFile = ""; 
+    }
+    else
+    {
+        if(displayFileDialogOpen)
+        {
+            fileDialogOpen.Open();
+            displayFileDialogOpen = false;
         }
-                                        
-        fileDialogOpen.Close();
-        fileDialogOpen.ClearSelected();            
-        inputConfigured = false;  
-        showPopup = true;                    
-    }        
+        fileDialogOpen.Display();
+        if(fileDialogOpen.HasSelected())
+        {
+            fileinfo.filename = fileDialogOpen.GetSelected().string();
+            if(settings.updatePath) SetSettingsPath(fileinfo.filename, settingsFile);
+
+            // Try to decode file metadata from filename
+            getFileMetadata(fileDialogOpen.GetSelected().string(), fileinfo);
+                                            
+            fileDialogOpen.Close();
+            fileDialogOpen.ClearSelected();            
+            inputConfigured = false;  
+            showPopup = true;                    
+        }     
+    }       
 
     //Parse file if opened new file
     if(parseFile && fileinfo.supportedFormat)
