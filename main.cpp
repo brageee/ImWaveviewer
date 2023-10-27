@@ -17,7 +17,7 @@ int main(int argc, char const *argv[]) {
         }
     }
     
-    MainGui* gui = new MainGui("ImWaveviewer",1500,800, argInputFile);        
+    MainGui* gui = new MainGui("Waveviewer",1500,800, argInputFile);        
     gui->Render();
     
     return 0;
