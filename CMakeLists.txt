@@ -9,7 +9,7 @@ find_package(glfw3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 find_package(FFTW REQUIRED)
-find_package(Liquid REQUIRED)
+find_package(LIQUID REQUIRED)
 
 include_directories(
     ${FFTW_INCLUDES}
